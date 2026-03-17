@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UST Compass</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0e0c;
+    --ink-2: #3a3830;
+    --ink-3: #7a7770;
+    --paper: #faf9f6;
+    --paper-2: #f2f0eb;
+    --paper-3: #e8e5de;
+    --gold: #c9a84c;
+    --gold-light: #f0dfa0;
+    --gold-dim: #8a6e2a;
+    --teal: #1a6b5a;
+    --teal-light: #e0f2ec;
+    --coral: #b84c2e;
+    --coral-light: #faeae5;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html { font-size: 16px; }
+  body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
+
+  /* ── LAYOUT ── */
+  #app {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    position: relative;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeUp 0.5s ease both; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 0 2.5rem;
+    border-bottom: 0.5px solid var(--paper-3);
+    margin-bottom: 2.5rem;
+  }
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .logo-mark {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .logo-sub {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .band-pill {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--paper-2);
+    color: var(--ink-2);
+    border: 0.5px solid var(--paper-3);
+    display: none;
+  }
+  .band-pill.visible { display: block; }
+
+  /* ── HERO / LANDING ── */
+  .hero {
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+  .hero-value-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    background: linear-gradient(135deg, #fdf3d8, #fae8b0);
+    padding: 5px 16px;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+    border: 0.5px solid var(--gold-light);
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    font-weight: 300;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold-dim); }
+  .hero-subtitle {
+    font-size: 1rem;
+    color: var(--ink-3);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* ── BAND SELECT ── */
+  .band-section { padding: 1rem 0 2rem; }
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 1rem;
+  }
+  .band-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .band-card {
+    background: var(--paper);
+    border: 0.5px solid var(--paper-3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.25rem 1.25rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .band-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--paper-3);
+    transition: background var(--transition);
+  }
+  .band-card:hover { background: var(--paper-2); border-color: var(--paper-3); transform: translateY(-2px); }
+  .band-card.selected { background: var(--paper-2); border-color: var(--gold-light); }
+  .band-card.selected::before { background: var(--gold); }
+  .band-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    font-family: var(--font-display);
+    color: var(--ink-3);
+  }
+  .band-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 0.3rem;
+    color: var(--ink);
+  }
+  .band-desc {
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    border: none;
+    outline: none;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
+    border: 0.5px solid var(--paper-3);
+  }
+  .btn-ghost:hover { background: var(--paper-2); border-color: var(--paper-3); }
+  .btn-gold {
+    background: var(--gold);
+    color: #3a2d0a;
+  }
+  .btn-gold:hover { background: var(--gold-dim); color: var(--paper); transform: translateY(-1px); }
+
+  /* ── SCENARIO SELECT ── */
+  .scenarios-header {
+    margin-bottom: 2rem;
+  }
+  .scenarios-header h2 {
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .scenarios-header p {
+    color: var(--ink-3);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+  .scenario-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .scenario-card {
+    background: var(--paper);
+    border: 0.5px solid var(--paper-3);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario-card:hover:not(.locked) { background: var(--paper-2); transform: translateX(4px); border-color: var(--paper-3); }
+  .scenario-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .scenario-num {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--paper-3);
+    line-height: 1;
+    min-width: 2rem;
+    margin-top: -2px;
+  }
+  .scenario-info { flex: 1; }
+  .scenario-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+  }
+  .scenario-blurb {
+    font-size: 0.83rem;
+    color: var(--ink-3);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+  .scenario-badge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--teal-light);
+    color: var(--teal);
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+  .scenario-badge.locked-badge {
+    background: var(--paper-2);
+    color: var(--ink-3);
+  }
+
+  /* ── STORY ENGINE ── */
+  .story-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 0.5px solid var(--paper-3);
+  }
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .pdot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--paper-3);
+    transition: var(--transition);
+  }
+  .pdot.done { background: var(--gold); }
+  .pdot.active { background: var(--ink); width: 18px; border-radius: 3px; }
+  .progress-label {
+    font-size: 0.75rem;
+    color: var(--ink-3);
+    font-weight: 300;
+    margin-left: auto;
+  }
+
+  .story-scene {
+    margin-bottom: 2rem;
+  }
+  .scene-context {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1rem;
+  }
+  .scene-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .scene-narrative {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--ink-2);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--paper-2);
+    border-radius: var(--radius);
+    border-left: 2px solid var(--gold-light);
+  }
+  .scene-question {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    font-style: italic;
+  }
+
+  /* ── CHOICE CARDS ── */
+  .choices { display: flex; flex-direction: column; gap: 0.6rem; }
+  .choice-btn {
+    background: var(--paper);
+    border: 0.5px solid var(--paper-3);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    font-family: var(--font-body);
+    width: 100%;
+  }
+  .choice-btn:hover { background: var(--paper-2); border-color: var(--paper-3); transform: translateX(4px); }
+  .choice-btn.selected { background: var(--paper-2); border-color: var(--gold-light); }
+  .choice-btn.dimmed { opacity: 0.45; transform: none !important; }
+  .choice-letter {
+    min-width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--paper-2);
+    border: 0.5px solid var(--paper-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ink-3);
+    transition: var(--transition);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .choice-btn.selected .choice-letter {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #3a2d0a;
+  }
+  .choice-text { font-size: 0.9rem; color: var(--ink-2); font-weight: 400; line-height: 1.5; }
+  .choice-btn.selected .choice-text { color: var(--ink); }
+
+  /* ── IMPLICATION REVEAL ── */
+  .implication-box {
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--paper-2);
+    border: 0.5px solid var(--paper-3);
+    animation: fadeUp 0.4s ease both;
+  }
+  .impl-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 0.5rem;
+  }
+  .impl-text {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+  .impl-scores {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  .score-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+  .score-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .dot-pos { background: var(--teal); }
+  .dot-neg { background: var(--coral); }
+  .dot-neu { background: var(--ink-3); }
+  .dot-mid { background: var(--gold-dim); }
+
+  /* ── REFLECTION ── */
+  .reflection-box {
+    background: #f9f4e8;
+    border: 0.5px solid var(--gold-light);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0;
+    animation: fadeUp 0.4s ease both;
+  }
+  .reflection-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.75rem;
+  }
+  .reflection-q {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  textarea.reflection-input {
+    width: 100%;
+    margin-top: 0.75rem;
+    background: rgba(255,255,255,0.6);
+    border: 0.5px solid var(--gold-light);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    font-weight: 300;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  textarea.reflection-input:focus { border-color: var(--gold); }
+  textarea.reflection-input::placeholder { color: var(--ink-3); }
+
+  /* ── RESULTS ── */
+  .results-hero {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+  }
+  .badge-glyph {
+    width: 80px; height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #fdf3d8, #f5d98a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--gold-dim);
+    border: 1.5px solid var(--gold-light);
+  }
+  .badge-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+  .badge-name {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+  }
+  .badge-tagline {
+    font-size: 0.9rem;
+    color: var(--ink-3);
+    font-weight: 300;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .score-board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 2rem 0;
+  }
+  .score-card {
+    background: var(--paper-2);
+    border: 0.5px solid var(--paper-3);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .sc-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 0.5rem;
+  }
+  .sc-bar-bg {
+    height: 4px;
+    background: var(--paper-3);
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+  }
+  .sc-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--gold);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sc-val {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .coaching-block {
+    background: var(--paper);
+    border: 0.5px solid var(--paper-3);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .coaching-block h3 {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+  .coaching-block p {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    font-weight: 300;
+    line-height: 1.8;
+  }
+  .value-reveal {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #fdf3d8, #f5e5a3);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-top: 0.75rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--paper-3);
+    margin: 2rem 0;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 540px) {
+    .band-grid { grid-template-columns: 1fr; }
+    .score-board { grid-template-columns: 1fr; }
+    header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 150px;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo">
+      <span class="logo-mark">UST Compass</span>
+      <span class="logo-sub">Values in Practice</span>
+    </div>
+    <div class="header-right">
+      <span class="band-pill" id="bandPill"></span>
+    </div>
+  </header>
+
+  <!-- ╔══ SCREEN: LANDING ══╗ -->
+  <div class="screen active" id="screen-landing">
+    <div class="hero">
+      <div class="hero-value-tag">Season 01 · Integrity</div>
+      <h1>Navigate the <em>moments</em><br>that define you</h1>
+      <p class="hero-subtitle">Real workplace dilemmas. Real consequences. A safe space to explore who you are — and who you want to be.</p>
+      <div class="band-section">
+        <div class="section-label">First, tell us where you are in your journey</div>
+        <div class="band-grid">
+          <div class="band-card" data-band="early" onclick="selectBand(this,'early')">
+            <span class="band-icon">I</span>
+            <div class="band-name">Early Career</div>
+            <div class="band-desc">0–5 years. Building foundations, navigating peer pressure, finding your voice.</div>
+          </div>
+          <div class="band-card" data-band="mid" onclick="selectBand(this,'mid')">
+            <span class="band-icon">II</span>
+            <div class="band-name">Mid-Management</div>
+            <div class="band-desc">5–15 years. Balancing team loyalty, business pressure and your own judgment.</div>
+          </div>
+          <div class="band-card" data-band="senior" onclick="selectBand(this,'senior')">
+            <span class="band-icon">III</span>
+            <div class="band-name">Senior Leadership</div>
+            <div class="band-desc">Shaping culture, policies and the choices that ripple across your organisation.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="startBtn" disabled onclick="goToScenarioSelect()">
+        Begin &rarr;
+      </button>
+    </div>
+  </div>
+
+  <!-- ╔══ SCREEN: SCENARIO SELECT ══╗ -->
+  <div class="screen" id="screen-select">
+    <div class="scenarios-header">
+      <h2>Choose a scenario</h2>
+      <p>Each story explores a different facet of Integrity. Work through them in any order — the third unlocks after completing two.</p>
+    </div>
+    <div class="scenario-list" id="scenarioList"></div>
+    <div style="margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="goTo('screen-landing')">&#8592; Change band</button>
+    </div>
+  </div>
+
+  <!-- ╔══ SCREEN: STORY ══╗ -->
+  <div class="screen" id="screen-story">
+    <div id="storyContent"></div>
+  </div>
+
+  <!-- ╔══ SCREEN: RESULTS ══╗ -->
+  <div class="screen" id="screen-results">
+    <div id="resultsContent"></div>
+  </div>
+
+</div>
+
+<script>
+const state = {
+  band: null,
+  scenarioId: null,
+  completedScenarios: [],
+  _l0ChoiceIndex: null,
+  _finalScores: null,
+};
+
+// level2 is a plain array of 3 branches indexed by the choice made at level1
+const SCENARIOS = {
+  early: [
+    {
+      id: 'ec1',
+      title: 'The Data Dilemma',
+      blurb: 'A teammate has "tidied up" the numbers. Do you stay silent?',
+      level1: {
+        context: 'Quarterly Business Review',
+        title: "The numbers don't look right",
+        narrative: "You're a junior analyst working late on the QBR deck. Scrolling through the slides, you spot that a teammate — Priya, who trained you and has always been kind — has quietly adjusted the customer retention rate from 78% to 84%. The deck goes to the VP tomorrow.",
+        question: 'What do you do?',
+        choices: [
+          { text: 'Tell your manager before the meeting tomorrow.', implication: "Your manager thanks you quietly and corrects the data. The presentation is delayed a few hours and Priya is spoken to privately. Some colleagues see you as principled; others whisper you broke a team code.", scores: { reputation: 70, trust: 85, longterm: 80, morale: 40 } },
+          { text: 'Talk to Priya privately before anyone else sees it.', implication: "Priya is defensive at first, then grateful. She fixes it before it reaches your manager. You've protected the data, preserved the relationship, and taken on personal risk quietly.", scores: { reputation: 65, trust: 75, longterm: 85, morale: 75 } },
+          { text: "Let it go — it's a small difference and the team needs a good review.", implication: "The deck is praised. But six weeks later, when actual churn figures are audited, the gap is noticed. You feel the weight of knowing you saw this first.", scores: { reputation: 30, trust: 25, longterm: 20, morale: 50 } },
+        ],
+        reflection: 'Before you act — what are you actually protecting here? The data, the relationship, or your own comfort?',
+      },
+      level2: [
+        {
+          context: 'Two days later',
+          title: 'Now Priya knows it was you',
+          narrative: "Your manager thanked you and the deck was corrected. But Priya has worked out it was you who flagged it. She hasn't said anything — but the warmth between you is gone.",
+          question: 'How do you handle it?',
+          choices: [
+            { text: 'Ask Priya for five minutes and explain why you did it — not to justify, but to be honest.', implication: "It's awkward. Priya says she understands, but isn't sure she does — not yet. Trust is rebuilding slowly. You feel clear.", scores: { reputation: 80, trust: 85, longterm: 90, morale: 65 } },
+            { text: 'Give her space and let time do the work.', implication: 'The distance lingers for a few weeks. Eventually things normalise, but there\'s a thin layer of glass between you.', scores: { reputation: 60, trust: 55, longterm: 65, morale: 50 } },
+            { text: 'Apologise to Priya to smooth things over.', implication: "She appreciates the gesture but something feels off — you apologised for doing the right thing. You carry that ambivalence.", scores: { reputation: 40, trust: 50, longterm: 45, morale: 55 } },
+          ],
+          reflection: 'Can you stand behind a decision that was right — even when it costs you something socially?',
+        },
+        {
+          context: 'Later that morning',
+          title: 'Your manager asks in passing',
+          narrative: "The deck is clean. Your manager, Tom Barrett, notices the data looks more conservative than expected and asks if everything checked out. You're standing right next to Priya.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"Yes — I reviewed it with Priya and we made sure the numbers were solid."', implication: 'Truthful and collaborative. Tom nods. Priya gives you the smallest grateful look. A quiet partnership forms.', scores: { reputation: 85, trust: 90, longterm: 88, morale: 85 } },
+            { text: '"Yes, all good." (Leave it there.)', implication: "Simple. No drama. But you've quietly erased your role in fixing something real.", scores: { reputation: 55, trust: 60, longterm: 60, morale: 65 } },
+            { text: 'Stay silent and let Priya respond.', implication: 'Priya says "yes, all good." You said nothing false. But the silence has weight.', scores: { reputation: 45, trust: 50, longterm: 55, morale: 55 } },
+          ],
+          reflection: "When you've already done the hard part privately, how honest do you need to be in public?",
+        },
+        {
+          context: 'Six weeks later',
+          title: 'Finance flags a discrepancy',
+          narrative: "An audit surfaces a gap between the QBR numbers and the actuals. It's being investigated. You're asked to recall who reviewed the retention data.",
+          question: 'What do you say?',
+          choices: [
+            { text: "Tell the truth: you noticed the discrepancy at the time but didn't raise it.", implication: "Uncomfortable. You get a frank conversation with your manager about accountability. Your candour now earns back some trust — but you carry the lesson.", scores: { reputation: 60, trust: 70, longterm: 75, morale: 55 } },
+            { text: "Say you didn't have visibility into that section of the deck.", implication: "Technically deniable. But you know. The investigation continues, pulling others into discomfort that you might have prevented.", scores: { reputation: 20, trust: 15, longterm: 10, morale: 25 } },
+            { text: 'Speak to Priya first — tell her what\'s happening before you say anything.', implication: "Priya is grateful and scared. She chooses to come forward herself. Your loyalty to her was real, even if delayed. The outcome is messy but honest.", scores: { reputation: 55, trust: 65, longterm: 70, morale: 60 } },
+          ],
+          reflection: "Is there a version of honesty that's still available to you — even now, even late?",
+        },
+      ],
+    },
+    {
+      id: 'ec2',
+      title: 'The Shortcut Reference',
+      blurb: "Someone asks you to vouch for work you didn't fully review.",
+      level1: {
+        context: 'Internal Peer Review',
+        title: 'Your name on someone else\'s work',
+        narrative: "A peer, Dev Sharma, asks you to co-sign his technical analysis before it goes to a client. \"Just need a second name,\" he says. \"It's mostly done.\" You skim it — it looks fine, but you haven't verified the methodology. The client is presenting this to their board next week.",
+        question: 'What do you do?',
+        choices: [
+          { text: 'Decline to co-sign unless you can do a proper review first.', implication: "Dev is frustrated — \"it'll take you hours.\" You do it anyway. You find one significant assumption that was poorly evidenced. It gets fixed. The client's board presentation is stronger for it.", scores: { reputation: 85, trust: 90, longterm: 92, morale: 55 } },
+          { text: "Co-sign it — Dev knows this work better than you, and you trust him.", implication: "The client uses the analysis. The board pushes back on one claim. It's manageable but uncomfortable. You're mentioned as the second reviewer.", scores: { reputation: 35, trust: 30, longterm: 25, morale: 50 } },
+          { text: "Ask Dev to remove your name — you'll support but not co-sign work you haven't verified.", implication: "Dev is slightly annoyed but respects the honesty. He finds another route. You keep your name clear.", scores: { reputation: 75, trust: 80, longterm: 82, morale: 65 } },
+        ],
+        reflection: "Where does your name end and someone else's work begin?",
+      },
+      level2: [
+        {
+          context: 'After the review',
+          title: 'You found something. Now what?',
+          narrative: "Your thorough review uncovered a flawed assumption. You've flagged it to Dev. He says: \"Let's just note it as a caveat in the appendix. The overall direction is right.\"",
+          question: 'How do you respond?',
+          choices: [
+            { text: 'Insist it needs to be addressed in the body of the report, not buried in an appendix.', implication: "Tension. Dev escalates to manager Ananya Singh. You hold your ground. The report is revised. The client notices the care — they mention it in their feedback.", scores: { reputation: 90, trust: 90, longterm: 92, morale: 55 } },
+            { text: "Agree to the appendix note — the direction is right and Dev knows this space.", implication: "The report goes out. The caveat is noticed by nobody. But you know it's there, partially buried.", scores: { reputation: 55, trust: 50, longterm: 45, morale: 55 } },
+            { text: 'Suggest a one-paragraph callout in the main body, framed as "sensitivity analysis."', implication: "Dev agrees. The concern is visible without being alarming. A good compromise that doesn't dilute the work.", scores: { reputation: 80, trust: 85, longterm: 85, morale: 80 } },
+          ],
+          reflection: "When you've already done something brave, what does it take to follow it all the way through?",
+        },
+        {
+          context: 'Two weeks later',
+          title: 'The board question surfaces',
+          narrative: "The client emails your team: the board raised a question about the methodology section you skimmed. They've asked for a clarification note.",
+          question: 'What do you do?',
+          choices: [
+            { text: "Own the co-sign: draft the clarification yourself, even though Dev knows the work better.", implication: "You learn the methodology properly in the process. The clarification is clear. The client appreciates the response.", scores: { reputation: 65, trust: 70, longterm: 75, morale: 65 } },
+            { text: "Ask Dev to take the lead — he built it, you can support.", implication: "Dev handles it well. You add nothing, but you're honest about the limits of your contribution.", scores: { reputation: 55, trust: 65, longterm: 65, morale: 65 } },
+            { text: "Tell your manager the full story — that you co-signed without a complete review.", implication: "Uncomfortable but important. Your manager appreciates the honesty. You all agree to be clearer about what co-signing means going forward.", scores: { reputation: 75, trust: 85, longterm: 85, morale: 65 } },
+          ],
+          reflection: 'What does accountability look like when the situation has already moved on?',
+        },
+        {
+          context: 'One month later',
+          title: 'Dev asks again',
+          narrative: "Dev comes back with new work. \"I know last time was awkward,\" he says, \"but this one is really solid. Can you just put your name to it for credibility with the client?\"",
+          question: 'How do you respond?',
+          choices: [
+            { text: "Same answer as before — you'll review properly or not at all.", implication: "Dev rolls his eyes, but by now he knows what your name is worth. Over time, that means something.", scores: { reputation: 90, trust: 85, longterm: 92, morale: 60 } },
+            { text: "Agree this time — you've seen his work is usually strong, and the dynamic feels easier.", implication: "Maybe it's fine. Or maybe you've started a pattern where \"usually solid\" becomes your standard.", scores: { reputation: 40, trust: 40, longterm: 30, morale: 55 } },
+            { text: "Offer to review specifically what the client will scrutinise — not the whole thing.", implication: "A reasonable scope boundary. Dev agrees. You both learn how to collaborate with clearer expectations.", scores: { reputation: 80, trust: 80, longterm: 82, morale: 80 } },
+          ],
+          reflection: 'Does integrity have a habit? Or does it require a choice every time?',
+        },
+      ],
+    },
+    {
+      id: 'ec3',
+      title: 'The Borrowed Credit',
+      blurb: "An idea you shaped is being presented as someone else's — in front of leadership.",
+      level1: {
+        context: 'Team Presentation',
+        title: 'Your work, their moment',
+        narrative: "You spent three evenings building the framework that anchors today's client proposal. Your team lead, Rohan Mehta, is presenting it to the senior director, Sarah O'Brien. In the room, he says: \"I've been thinking about this approach for a while.\" He doesn't mention you. Sarah is impressed. Rohan catches your eye briefly — then moves on.",
+        question: 'What do you do?',
+        choices: [
+          { text: 'Say nothing in the meeting — raise it with Rohan privately afterwards.', implication: "The meeting ends smoothly. Rohan knows what he did. You approach him calmly after. He's defensive at first. The conversation is real and necessary.", scores: { reputation: 70, trust: 72, longterm: 80, morale: 55 } },
+          { text: "Gently add context in the meeting: \"Happy to walk through the detail — I built out the framework yesterday.\"", implication: "There's a brief awkward pause. Sarah looks at Rohan, then at you, and says: \"Good to know — let's hear it from you then.\" Rohan is visibly uncomfortable.", scores: { reputation: 80, trust: 75, longterm: 82, morale: 60 } },
+          { text: "Let it go — credit battles aren't worth the relationship cost.", implication: "The meeting closes well. But Sarah attributes the thinking to Rohan in the follow-up email. You've become invisible in a moment that mattered.", scores: { reputation: 30, trust: 30, longterm: 28, morale: 35 } },
+        ],
+        reflection: 'What does it cost you — professionally and personally — to stay silent about your own contribution?',
+      },
+      level2: [
+        {
+          context: 'Later that day',
+          title: 'The conversation with Rohan',
+          narrative: "You pull Rohan aside. He says: \"I was going to credit you in the write-up — the meeting just moved fast.\" You're not sure you believe that. Sarah has already emailed him saying the framework was strong.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"I hear you. But I need you to correct it — with Sarah, and in the write-up."', implication: "Rohan agrees, uncomfortably. He sends a follow-up to Sarah citing your contribution. It's awkward but it's on the record.", scores: { reputation: 85, trust: 80, longterm: 88, morale: 70 } },
+            { text: "Accept his explanation — assume it was an oversight and move on.", implication: "The dynamic continues. In the next meeting, the same thing happens. The pattern is now set.", scores: { reputation: 35, trust: 30, longterm: 28, morale: 30 } },
+            { text: "Ask him to CC you on future client work so your involvement is visible from the start.", implication: "A practical fix. Rohan agrees. You've addressed the system without escalating the conflict.", scores: { reputation: 72, trust: 68, longterm: 75, morale: 65 } },
+          ],
+          reflection: "Is there a way to claim what's yours without making it a zero-sum fight?",
+        },
+        {
+          context: 'The following week',
+          title: 'Sarah asks you directly',
+          narrative: "The senior director stops by your desk. \"I heard you built most of that framework — Rohan mentioned it. Tell me about your thinking.\" Rohan didn't tell you he'd done this.",
+          question: 'How do you respond?',
+          choices: [
+            { text: 'Walk her through your thinking clearly and confidently — this is your work.', implication: "The conversation flows. Sarah is engaged. She asks if you'd be willing to lead the next proposal phase. Something shifts.", scores: { reputation: 90, trust: 88, longterm: 92, morale: 88 } },
+            { text: '"It was really a team effort — Rohan shaped a lot of it too."', implication: "Modest. But you've just re-buried your own contribution in a moment designed to surface it.", scores: { reputation: 40, trust: 42, longterm: 38, morale: 40 } },
+            { text: "Be honest about your role and acknowledge Rohan's context and pressure as well.", implication: "Sarah appreciates the generosity. She notes your maturity. You come out recognised — and not diminished.", scores: { reputation: 85, trust: 90, longterm: 88, morale: 82 } },
+          ],
+          reflection: "What does it mean to own your work — not defensively, but clearly?",
+        },
+        {
+          context: 'Two weeks later',
+          title: 'Rohan asks for your help again',
+          narrative: "Rohan comes to you with another client pitch. \"You're the best at this kind of framing,\" he says. \"Can we work on it together?\" He seems genuine. But you're carrying what happened last time.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"Yes — but this time I want us to agree upfront how we\'ll present it together."', implication: "Rohan nods. You set a clear norm before you start. The collaboration is better for it. So is the pitch.", scores: { reputation: 88, trust: 85, longterm: 90, morale: 82 } },
+            { text: "Decline — you're not ready to go through that again.", implication: "A fair boundary. Rohan is disappointed. The pitch goes ahead without you and is weaker. You feel clear, but also a little isolated.", scores: { reputation: 60, trust: 62, longterm: 58, morale: 55 } },
+            { text: "Say yes without conditions — you want to give him the benefit of the doubt.", implication: "Generous. The collaboration is smoother. But you haven't named the pattern — so it may return.", scores: { reputation: 55, trust: 55, longterm: 50, morale: 52 } },
+          ],
+          reflection: "What would a healthy working relationship with Rohan actually look like — and is it possible from here?",
+        },
+      ],
+    },
+  ],
+
+  mid: [
+    {
+      id: 'mm1',
+      title: 'The Pressure to Commit',
+      blurb: 'Leadership wants a confident forecast. Your data tells a different story.',
+      level1: {
+        context: 'Pipeline Review',
+        title: 'The numbers they want vs. the numbers you have',
+        narrative: "You're presenting your team's Q3 pipeline to the regional director, Claire Nguyen. The honest forecast is ₹4.2 Cr. Leadership has set an expectation of ₹6 Cr as a \"target floor.\" Before the call, a senior peer texts you: \"Just put 5.5. It's expected. Everyone does this.\"",
+        question: 'What do you present?',
+        choices: [
+          { text: 'Present the honest ₹4.2 Cr forecast with a clear plan to bridge the gap.', implication: "Claire is visibly disappointed. You're asked pointed questions. You answer them all. The meeting is tense but productive. After the call, she says privately: \"I appreciate the clarity.\"", scores: { reputation: 80, trust: 90, longterm: 92, morale: 60 } },
+          { text: "Present ₹5.5 Cr — you'll find a way to make it work.", implication: "The call goes smoothly. But now you own a number your team can't hit without significant pressure. Some of your best people begin to feel the weight of targets they didn't set.", scores: { reputation: 50, trust: 35, longterm: 25, morale: 35 } },
+          { text: 'Present ₹4.2 Cr as "base case" and ₹6 Cr as "upside case" without committing to either.', implication: "Diplomatic. Claire sees it as hedging. You've bought time, but not clarity. The ambiguity follows you into the next review.", scores: { reputation: 55, trust: 55, longterm: 50, morale: 55 } },
+        ],
+        reflection: "Who are you actually protecting when you inflate a number — the team, the organisation, or your own discomfort?",
+      },
+      level2: [
+        {
+          context: 'Post-call',
+          title: 'Your team overheard the call',
+          narrative: "Two of your top performers, Arjun and Mia Bennett, approach you after the meeting. \"We heard the target discussion. Is ₹4.2 Cr what we're actually planning for, or is there a real number we're not being told?\" They look directly at you.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"₹4.2 Cr is our real plan. I presented it honestly and I\'ll fight for it to stay that way."', implication: "Relief in the room. Trust rises. Mia says quietly: \"Thank you for not playing games with us.\"", scores: { reputation: 90, trust: 95, longterm: 90, morale: 90 } },
+            { text: '"The conversation is still evolving — let\'s focus on what we can control."', implication: "Diplomatic but evasive. They read between the lines. A small crack of uncertainty appears.", scores: { reputation: 55, trust: 45, longterm: 50, morale: 45 } },
+            { text: '"Leadership sets the targets — I\'ll make sure you have what you need to hit whatever we agree."', implication: "You've shifted ownership upward. Your team hears: \"I didn't protect you.\" That has consequences over time.", scores: { reputation: 35, trust: 30, longterm: 25, morale: 25 } },
+          ],
+          reflection: "Your team's trust in you is a resource. Once spent, it costs more to rebuild than it did to earn.",
+        },
+        {
+          context: 'Three months in',
+          title: "You're tracking short of ₹5.5 Cr",
+          narrative: "Q3 is ending and you're at ₹4.6 Cr — better than honest forecast but well short of what you committed. You're due to report to Claire next week.",
+          question: 'How do you approach the review?',
+          choices: [
+            { text: 'Lead with the gap and your analysis of why — own the miss transparently.', implication: "Uncomfortable but professional. Claire has seen worse. She asks good questions. You leave with a plan.", scores: { reputation: 70, trust: 75, longterm: 78, morale: 60 } },
+            { text: 'Package the ₹4.6 Cr as strong performance against a revised internal plan — reframe the story.', implication: "The framing is accepted. But you know, and Claire probably suspects. You've added complexity to your next review.", scores: { reputation: 30, trust: 25, longterm: 15, morale: 35 } },
+            { text: 'Request a pre-call with Claire before the formal review to get ahead of the story.', implication: "She appreciates the heads-up. The formal review becomes a problem-solving conversation rather than a scrutiny session.", scores: { reputation: 75, trust: 82, longterm: 80, morale: 70 } },
+          ],
+          reflection: "What would it look like to stay in integrity even after you've already compromised it slightly?",
+        },
+        {
+          context: 'After the forecast',
+          title: 'Claire pushes back on ₹4.2 Cr',
+          narrative: "Claire calls you after the session: \"I respect the honesty but I need you to find another ₹1.2 Cr. What can you do?\" Your team is already at capacity.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"I can stretch to ₹4.8 Cr if we add one contractor and re-prioritise mid-quarter. That\'s real and I\'ll own it."', implication: "Claire agrees. You've negotiated upward from truth, not downward from fiction. The team can hit ₹4.8 Cr.", scores: { reputation: 88, trust: 90, longterm: 90, morale: 80 } },
+            { text: '"We\'ll find a way to ₹5.5 Cr. I\'ll make it work."', implication: "You've re-entered the same cycle. The next three months will be a pressure campaign your team didn't consent to.", scores: { reputation: 40, trust: 30, longterm: 20, morale: 20 } },
+            { text: '"I can\'t add false confidence to this number — but I can show you exactly what ₹1.2 Cr more would require."', implication: "Claire pauses. \"Fair,\" she says. A new conversation about resourcing begins. Slower, but cleaner.", scores: { reputation: 85, trust: 88, longterm: 90, morale: 75 } },
+          ],
+          reflection: "Is there a version of ambition that doesn't require you to misrepresent what's real?",
+        },
+      ],
+    },
+    {
+      id: 'mm2',
+      title: 'The Promotion Shortcut',
+      blurb: 'Someone is asking you to tilt a process in their favour.',
+      level1: {
+        context: 'Talent Review',
+        title: "A favour you can't quite name",
+        narrative: "A peer manager, Neha Iyer, calls you ahead of the quarterly talent calibration. She wants her direct report, Rohan, moved to the high-potential list. \"He's brilliant but the committee doesn't know his work. You're on the committee. Can you just speak to his potential?\" You've worked with Rohan. He's good, but high-potential is a stretch.",
+        question: 'What do you do?',
+        choices: [
+          { text: "Decline — you'll speak to what you've genuinely observed, not to a desired outcome.", implication: "Neha is disappointed. In the calibration, you share balanced feedback. Rohan isn't listed this cycle, but the committee gets an honest picture.", scores: { reputation: 85, trust: 88, longterm: 90, morale: 60 } },
+          { text: "Agree to speak to his potential — you've seen enough to believe in him, even if the evidence is partial.", implication: "You share positive impressions. Rohan is shortlisted. He may grow into the designation — or struggle and reflect badly on the process that elevated him.", scores: { reputation: 40, trust: 35, longterm: 30, morale: 50 } },
+          { text: "Tell Neha you'll share what you've observed honestly, and encourage her to formally present his case herself.", implication: "Neha prepares a stronger case. In the meeting, the two of you give a more complete picture. Rohan is shortlisted with more backing than a single advocacy call would have provided.", scores: { reputation: 88, trust: 90, longterm: 88, morale: 82 } },
+        ],
+        reflection: 'When someone asks you to advocate, are they asking for your voice or for your credibility?',
+      },
+      level2: [
+        {
+          context: 'In the calibration',
+          title: 'A committee member pushes back',
+          narrative: "During the calibration, senior director James Park challenges Rohan's readiness: \"I'm not seeing the evidence for high-potential. What makes this different from a strong performer?\" All eyes drift to you.",
+          question: 'How do you respond?',
+          choices: [
+            { text: "Share specifically what you've observed — no more, no less.", implication: "James is satisfied with the specificity. Your credibility in the room rises. Rohan's case is heard fairly.", scores: { reputation: 90, trust: 92, longterm: 90, morale: 80 } },
+            { text: "Lean into the advocacy — you want to help Neha's case hold.", implication: "James probes further. You find yourself saying things you're not sure are true. The room notices.", scores: { reputation: 30, trust: 25, longterm: 20, morale: 30 } },
+            { text: 'Acknowledge the ambiguity: "There are indicators but the full picture needs more data — I\'d recommend a stretch assignment before the next cycle."', implication: "A measured, fair call. The committee agrees. Rohan gets a defined growth path. Neha is disappointed but can't disagree with the logic.", scores: { reputation: 85, trust: 88, longterm: 90, morale: 75 } },
+          ],
+          reflection: 'What is your credibility in that room actually for?',
+        },
+        {
+          context: 'After the calibration',
+          title: 'Neha is upset with you',
+          narrative: "Neha sends you a clipped message: \"I thought you were going to support Rohan.\" The implication is clear — she feels you didn't hold up your end.",
+          question: 'How do you respond?',
+          choices: [
+            { text: '"I shared what I honestly observed. That\'s what I promised — and it\'s what you deserve too."', implication: "Neha is quiet for a day. Then: \"I get it. I pushed too hard.\" A professional recovery.", scores: { reputation: 88, trust: 88, longterm: 90, morale: 75 } },
+            { text: "Apologise — you feel bad and don't want the friction.", implication: "The friction eases but something ambiguous is now set: she may ask again next cycle, expecting more.", scores: { reputation: 35, trust: 40, longterm: 30, morale: 55 } },
+            { text: "Let the message sit — she'll process it and come around.", implication: "The silence is awkward for two weeks. Eventually it passes. But the conversation never happened.", scores: { reputation: 55, trust: 50, longterm: 55, morale: 45 } },
+          ],
+          reflection: 'What do you owe a colleague who is disappointed by your honesty?',
+        },
+        {
+          context: 'Post-calibration',
+          title: 'Rohan finds out',
+          narrative: "Rohan pulls you aside. \"Neha told me what happened. I just want to know — do you think I'm actually ready, or was this about the process?\" He looks genuinely uncertain.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"I think you\'re building toward it. Here\'s what I\'d focus on."', implication: "Rohan nods, absorbs it, and thanks you. He asks for a mentoring conversation. Something real begins.", scores: { reputation: 90, trust: 92, longterm: 92, morale: 85 } },
+            { text: '"You\'re absolutely ready — the process just didn\'t capture it."', implication: "Rohan leaves feeling better. But you've said something you don't fully believe. And he's building on that foundation.", scores: { reputation: 30, trust: 25, longterm: 20, morale: 50 } },
+            { text: '"That\'s a conversation to have with Neha and your development plan — I can\'t speak to it fully."', implication: "Appropriate. But Rohan needed something human from you and you redirected to process. He notices.", scores: { reputation: 55, trust: 50, longterm: 60, morale: 45 } },
+          ],
+          reflection: 'What does honesty look like when someone is asking you to see them?',
+        },
+      ],
+    },
+    {
+      id: 'mm3',
+      title: 'The Silent Workaround',
+      blurb: "Your team found a faster path. But no one asked if it was allowed.",
+      level1: {
+        context: 'Client Delivery',
+        title: 'The shortcut that worked — this time',
+        narrative: "Your team delivered a project two weeks ahead of schedule. In the debrief, you discover they bypassed the standard security review using a workaround that Kavya Nair, your lead engineer, quietly documented but never escalated. The client is delighted. Your manager, David Chen, is about to announce this as a delivery model for other teams.",
+        question: 'What do you do?',
+        choices: [
+          { text: "Raise it with David before the announcement — the workaround needs review before it's scaled.", implication: "David is surprised. He pauses the announcement. The security team reviews it — two issues are found, both fixable. The model is refined and then shared. It's better for the pause.", scores: { reputation: 82, trust: 90, longterm: 92, morale: 65 } },
+          { text: "Let the announcement proceed — the workaround worked and the client is happy.", implication: "The model spreads to three other teams. Six weeks later, one hits a compliance issue traceable to the workaround. The trail leads back to your delivery.", scores: { reputation: 25, trust: 20, longterm: 15, morale: 40 } },
+          { text: "Talk to Kavya first — understand why she made the call before raising it upward.", implication: "Kavya explains the pressure and the logic. Her reasoning was sound but incomplete. You go to David together. The conversation is richer for the context.", scores: { reputation: 78, trust: 85, longterm: 88, morale: 80 } },
+        ],
+        reflection: "A good outcome doesn't automatically validate the process that produced it. How do you separate the two?",
+      },
+      level2: [
+        {
+          context: 'After the conversation with David',
+          title: 'The security review finds an issue',
+          narrative: "The security team flags a real risk in the workaround — not critical, but not trivial. David asks you: \"Did your team know this was a risk when they made the call?\" You're not sure. Kavya might have known.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"I don\'t know yet. Let me find out before we characterise it."', implication: "David respects the precision. You speak to Kavya. She didn't know about the specific risk. The record is accurate. The fix proceeds cleanly.", scores: { reputation: 88, trust: 90, longterm: 90, morale: 80 } },
+            { text: "Defend Kavya: \"She was working under real time pressure — this wasn't negligence.\"", implication: "True — but you've answered a question about knowledge with a statement about intent. David notices the difference.", scores: { reputation: 50, trust: 48, longterm: 52, morale: 58 } },
+            { text: "Confirm they didn't know — you're confident enough to say it without checking.", implication: "Convenient. If it turns out Kavya did know, you've now misled David on her behalf without her consent.", scores: { reputation: 30, trust: 28, longterm: 22, morale: 35 } },
+          ],
+          reflection: "When you're protecting someone, are you protecting them — or protecting yourself from an uncomfortable conversation?",
+        },
+        {
+          context: 'The announcement',
+          title: 'David wants to credit your team publicly anyway',
+          narrative: "Despite the review findings, David tells you: \"The team's initiative was real. I still want to recognise them in the all-hands — we can frame it as 'fast learning'.\" You're not sure that framing is accurate.",
+          question: 'How do you respond?',
+          choices: [
+            { text: '"I\'d rather we wait until the refined process is ready — recognise the outcome, not the shortcut."', implication: "David pauses. He agrees. The recognition is delayed by three weeks. When it happens, it's built on something solid.", scores: { reputation: 85, trust: 88, longterm: 90, morale: 72 } },
+            { text: "Go along with the framing — the team deserves the recognition.", implication: "The team is pleased. But the all-hands frames a workaround as a model. Others begin replicating it without the review.", scores: { reputation: 35, trust: 30, longterm: 22, morale: 60 } },
+            { text: "Suggest recognising the speed and client outcome specifically, without referencing the process.", implication: "Honest framing. The team is recognised for what was genuinely good. The process story stays internal.", scores: { reputation: 80, trust: 82, longterm: 82, morale: 80 } },
+          ],
+          reflection: "Recognition built on an incomplete story — does it honour the team, or does it create a debt?",
+        },
+        {
+          context: 'One month later',
+          title: 'Kavya asks to formalise the workaround',
+          narrative: "Kavya comes to you with a proposal: she wants to document her approach as an official fast-track methodology. \"It worked. Let's make it a real option.\" Her proposal is good but still skips a step the security team considers essential.",
+          question: 'What do you say?',
+          choices: [
+            { text: '"This is strong. But we need to include the security checkpoint — even if it slows us down slightly. Let\'s do it properly."', implication: "Kavya is slightly deflated, then engaged. She works with the security team. The final methodology is more robust — and Kavya owns it fully.", scores: { reputation: 90, trust: 90, longterm: 93, morale: 82 } },
+            { text: "Approve it as is — the security team can review it after it's in use.", implication: "The methodology gets traction quickly. The security review is quietly deprioritised. The pattern continues.", scores: { reputation: 28, trust: 25, longterm: 18, morale: 50 } },
+            { text: "Send it to the security team yourself rather than asking Kavya to navigate it.", implication: "Well-intentioned. But Kavya loses ownership of something she built. She notices. Next time she may not bring you her ideas first.", scores: { reputation: 62, trust: 58, longterm: 65, morale: 52 } },
+          ],
+          reflection: "How do you support someone's initiative without letting it set a standard you can't stand behind?",
+        },
+      ],
+    },
+  ],
+
+  senior: [
+    {
+      id: 'sl1',
+      title: 'The Culture Cover',
+      blurb: 'The exit interview tells a different story than the official narrative.',
+      level1: {
+        context: 'People Strategy Review',
+        title: 'What the data is trying to tell you',
+        narrative: "HR shares a confidential exit interview summary. Three high performers left in Q2. Two cited \"lack of transparency from leadership.\" One said: \"I never knew where I stood until it was too late.\" The official narrative in the all-hands: \"We're in a competitive talent market — everyone is losing good people.\" You're about to present the people strategy to the board.",
+        question: 'What do you present?',
+        choices: [
+          { text: 'Present the exit data to the board, including the leadership transparency feedback — verbatim.', implication: "The board is alert. There are uncomfortable questions. A board member asks if you have a plan. You do. The conversation shifts to solutions. It's one of the most productive board discussions in a year.", scores: { reputation: 85, trust: 90, longterm: 92, morale: 65 } },
+          { text: 'Present the talent market narrative — the exit data is directional, not conclusive.', implication: "The board accepts the framing. But the underlying issue persists. Six months later, three more people leave. The board feels it should have been told earlier.", scores: { reputation: 30, trust: 25, longterm: 15, morale: 30 } },
+          { text: "Present both — the market context and the exit data — and be explicit about what you don't yet know.", implication: "The board appreciates the nuance. A director asks: \"What intervention are you testing?\" You have one. The conversation is rigorous.", scores: { reputation: 90, trust: 92, longterm: 92, morale: 72 } },
+        ],
+        reflection: 'What is a board actually for, if not to see the whole picture?',
+      },
+      level2: [
+        {
+          context: 'Board aftermath',
+          title: 'A director calls you afterwards',
+          narrative: "Board member Sandra Walsh calls you: \"I appreciated the transparency. But I want to ask directly — is this a leadership behaviour issue, and if so, is it one person or systemic?\" You know the answer but it implicates a peer on your leadership team.",
+          question: 'How do you respond?',
+          choices: [
+            { text: "Name the pattern honestly — without naming an individual until you have more data.", implication: "\"It appears systemic in one area of the org. I'm gathering data before I can attribute it.\" Sandra respects the precision. You have 30 days to act.", scores: { reputation: 88, trust: 90, longterm: 92, morale: 70 } },
+            { text: "Name the individual — the board deserves to know.", implication: "The board takes note. An HR process begins. You've been honest but escalated before giving your peer due process. It gets complicated.", scores: { reputation: 55, trust: 60, longterm: 55, morale: 40 } },
+            { text: "Say you're still investigating — decline to speculate.", implication: "Sandra is slightly frustrated: \"I respect that, but time matters here.\" You've bought yourself precision at the cost of urgency.", scores: { reputation: 65, trust: 70, longterm: 68, morale: 55 } },
+          ],
+          reflection: 'At what point does protecting process become enabling harm?',
+        },
+        {
+          context: 'Internal response',
+          title: 'The official narrative is already out there',
+          narrative: "Your CEO has already sent the all-hands attributing attrition to the talent market. Now you have board pressure to dig deeper. Contradicting the CEO's message publicly is not simple.",
+          question: 'How do you navigate it?',
+          choices: [
+            { text: 'Brief the CEO directly — show the exit data and suggest a follow-up message that corrects the narrative.', implication: "A hard conversation. The CEO is initially defensive, then thoughtful. A revised message goes out. The org notices the shift.", scores: { reputation: 90, trust: 92, longterm: 93, morale: 80 } },
+            { text: 'Pursue the internal fix without correcting the public narrative.', implication: "You work quietly. Things improve. But some employees remember the gap between what was said and what they experienced.", scores: { reputation: 60, trust: 55, longterm: 62, morale: 50 } },
+            { text: 'Wait until the next all-hands and weave in a more nuanced framing yourself.', implication: "Cautious. The narrative softens over time. But the CEO doesn't know the full picture, and that asymmetry will surface eventually.", scores: { reputation: 50, trust: 45, longterm: 48, morale: 45 } },
+          ],
+          reflection: 'What is the cost of a narrative that protects everyone in the short term and no one in the long term?',
+        },
+        {
+          context: 'Strategic choice',
+          title: 'The root cause is a specific leader',
+          narrative: "Your investigation confirms it: one senior leader's management style is the primary driver of attrition in their team. They are also the company's highest revenue generator. You need to present a retention plan.",
+          question: 'What does the plan include?',
+          choices: [
+            { text: 'Name the root cause explicitly and recommend a structured performance conversation, regardless of the revenue impact.', implication: "The board approves. The leader enters a coaching process. Revenue dips briefly. Two people who were planning to leave, stay. The culture shift is slow but real.", scores: { reputation: 90, trust: 92, longterm: 95, morale: 85 } },
+            { text: "Design the plan around systemic improvements — don't name the individual.", implication: "The plan is politically safe. But the root cause persists. You've treated the symptom.", scores: { reputation: 50, trust: 45, longterm: 35, morale: 40 } },
+            { text: "Present two scenarios: one that names the root cause and one that doesn't — let the board decide.", implication: "The board respects the framing. They choose scenario one. The process is slower but the outcome is more durable.", scores: { reputation: 85, trust: 88, longterm: 88, morale: 75 } },
+          ],
+          reflection: 'What does it cost an organisation to protect revenue at the expense of culture? And who pays that cost?',
+        },
+      ],
+    },
+    {
+      id: 'sl2',
+      title: 'The Vendor Relationship',
+      blurb: 'A preferred vendor. A personal benefit. An uncomfortable question.',
+      level1: {
+        context: 'Procurement Review',
+        title: 'A gift that changes the shape of things',
+        narrative: "Your organisation is renewing a major vendor contract. The vendor's relationship manager, Vikram Nair, someone you've worked with for eight years, invites you and your partner to a five-day international conference. \"It's industry standard,\" he says. \"Everyone goes.\" You have authority to influence the renewal recommendation. No formal conflict of interest policy exists.",
+        question: 'What do you do?',
+        choices: [
+          { text: 'Decline the invitation and disclose the offer to the CFO.', implication: "The CFO, Rachel Webb, thanks you. The organisation uses this moment to draft a gifts and hospitality policy. Vikram is slightly surprised but respects the clarity. The contract is renewed on its merits.", scores: { reputation: 95, trust: 95, longterm: 96, morale: 75 } },
+          { text: "Accept — it's genuinely industry standard and your recommendation will be based on merit.", implication: "You attend. Your recommendation is merit-based. But a colleague, Priya, notices and raises an informal concern. An awkward review process follows.", scores: { reputation: 30, trust: 25, longterm: 20, morale: 40 } },
+          { text: "Decline but don't formally disclose — keep the relationship smooth.", implication: "Clean-ish. The relationship is maintained. But the grey area persists and no systemic fix is made.", scores: { reputation: 70, trust: 72, longterm: 65, morale: 60 } },
+        ],
+        reflection: 'If this decision were visible to your whole organisation — would it land differently?',
+      },
+      level2: [
+        {
+          context: 'Post-disclosure',
+          title: 'Your disclosure creates momentum',
+          narrative: "Rachel is grateful and asks you to lead a working group to create a hospitality policy. You discover two other instances last year where vendors offered personal benefits to decision-makers. No one disclosed.",
+          question: 'How do you handle the broader findings?',
+          choices: [
+            { text: 'Surface all findings in the working group — include the undisclosed instances.', implication: "Two colleagues are uncomfortable. Difficult conversations follow. A clear policy is created with past-facing amnesty for disclosure. The org is cleaner for it.", scores: { reputation: 92, trust: 92, longterm: 95, morale: 72 } },
+            { text: "Focus on the forward-looking policy — don't surface the past instances.", implication: "The policy is clean. The past is quietly buried. The two colleagues never know you know. The org moves on.", scores: { reputation: 65, trust: 60, longterm: 58, morale: 55 } },
+            { text: "Brief Rachel privately on the past instances before the working group convenes.", implication: "Rachel handles them individually before the group meets. The policy is built on a foundation that's been quietly cleaned. Pragmatic but somewhat opaque.", scores: { reputation: 78, trust: 80, longterm: 78, morale: 65 } },
+          ],
+          reflection: 'When you create space for integrity, who is responsible for what fills it?',
+        },
+        {
+          context: 'Vendor relationship',
+          title: 'Vikram is offended',
+          narrative: "Vikram calls you: \"I heard you disclosed the conference invitation. I want you to know it wasn't meant as a quid pro quo. I feel like I'm being treated as though I acted in bad faith.\"",
+          question: 'What do you say?',
+          choices: [
+            { text: '"I know that\'s not how you meant it. But I couldn\'t accept without disclosing — not because of you, but because of how I want to work."', implication: "He pauses, then: \"I respect that.\" The relationship survives, perhaps stronger for the honesty.", scores: { reputation: 92, trust: 90, longterm: 92, morale: 82 } },
+            { text: "Apologise for creating an awkward situation — you didn't mean to imply anything.", implication: "The relationship is smoothed over. But you've just apologised for having integrity. He notes it.", scores: { reputation: 40, trust: 40, longterm: 35, morale: 50 } },
+            { text: '"This is about the organisation\'s standards, not your intentions. Let\'s move forward."', implication: "Professional and clear. He doesn't love it but can't argue with it. The commercial relationship continues cleanly.", scores: { reputation: 85, trust: 82, longterm: 85, morale: 70 } },
+          ],
+          reflection: 'Can you hold firm on a boundary without making the other person wrong?',
+        },
+        {
+          context: 'Policy rollout',
+          title: 'Leadership wants to soften the policy',
+          narrative: "Your draft policy recommends a ₹5,000 cap on hospitality and mandatory disclosure above ₹2,000. Two C-suite peers, including Marcus Webb, argue: \"This will damage vendor relationships. The cap is too low for our level.\" They want ₹25,000.",
+          question: 'How do you respond?',
+          choices: [
+            { text: "Hold the ₹5,000 recommendation with evidence — show what the data says about perception risk.", implication: "The discussion is productive. The final policy lands at ₹8,000 — a genuine compromise. You've moved the anchor from a principled position.", scores: { reputation: 90, trust: 90, longterm: 92, morale: 78 } },
+            { text: "Accept the ₹25,000 cap — you've made the policy exist, that's progress.", implication: "The policy exists. But it codifies a standard most employees feel doesn't apply to them. A two-tier culture starts here.", scores: { reputation: 35, trust: 30, longterm: 22, morale: 30 } },
+            { text: "Propose tiered caps by seniority, disclosed transparently to all.", implication: "Pragmatic. Transparency about the tiers defuses some perception risk. An imperfect solution, honestly labelled.", scores: { reputation: 65, trust: 68, longterm: 62, morale: 55 } },
+          ],
+          reflection: 'What does compromise look like when it\'s principled — versus when it\'s just concession?',
+        },
+      ],
+    },
+    {
+      id: 'sl3',
+      title: 'The Board Disclosure',
+      blurb: 'A material risk has surfaced. Disclosing it will delay a deal that matters enormously.',
+      level1: {
+        context: 'M&A Due Diligence',
+        title: 'The finding that changes everything',
+        narrative: "You're three weeks from closing a significant acquisition. During final due diligence, your legal counsel, Ananya Krishnan, surfaces a regulatory non-compliance issue in the target company — not critical, but material. Disclosing it reopens negotiations and almost certainly delays the deal by months. Your CEO, Tom Hargreaves, says: \"We can remediate post-close. Let's keep moving.\" You have sign-off authority.",
+        question: 'What do you do?',
+        choices: [
+          { text: "Insist on disclosure before close — this is a material finding and it must be on the record.", implication: "Tom is frustrated. Negotiations reopen. The counterparty uses the finding to renegotiate the price down 8%. The deal closes four months later — cleaner, with no legal exposure on your side.", scores: { reputation: 88, trust: 92, longterm: 96, morale: 65 } },
+          { text: "Agree to post-close remediation — the issue is manageable and the deal is sound.", implication: "The deal closes on schedule. Six months post-close, the non-compliance surfaces in a regulatory audit. Questions are asked about what was known and when.", scores: { reputation: 22, trust: 18, longterm: 12, morale: 35 } },
+          { text: "Request an independent legal opinion before making a call.", implication: "Ananya supports it. External counsel confirms it's disclosable. You now have a clear recommendation to take to Tom — and you're not standing alone.", scores: { reputation: 82, trust: 85, longterm: 88, morale: 72 } },
+        ],
+        reflection: 'When a decision is irreversible, how much certainty do you need before you speak?',
+      },
+      level2: [
+        {
+          context: 'After the delay',
+          title: 'Tom blames the outcome on you',
+          narrative: "The renegotiated deal has closed. In a leadership team meeting, Tom says: \"The price adjustment cost us significantly. I want us to reflect on whether every legal flag needs to surface the way this one did.\" He's looking at you.",
+          question: 'How do you respond?',
+          choices: [
+            { text: 'Address it directly in the room: "I\'d make the same call again. The alternative was worse."', implication: "Silence. Then two colleagues nod. Tom doesn't respond, but he doesn't push further. The room has noted where you stand.", scores: { reputation: 90, trust: 92, longterm: 93, morale: 78 } },
+            { text: 'Let it pass in the meeting and speak to Tom privately afterwards.', implication: "The private conversation goes better than the room would have. Tom acknowledges, off the record, that you were right. But the public moment passed without clarity.", scores: { reputation: 65, trust: 70, longterm: 72, morale: 60 } },
+            { text: 'Acknowledge the cost: "The price adjustment was real and I own the disruption. I still believe the disclosure was the right call."', implication: "Owning the consequence while holding the position. Tom is visibly surprised by the directness. The room settles.", scores: { reputation: 92, trust: 92, longterm: 95, morale: 82 } },
+          ],
+          reflection: 'Standing by a principled decision publicly is different from defending it. What\'s the difference?',
+        },
+        {
+          context: 'Three months later',
+          title: 'Ananya is being moved off M&A work',
+          narrative: "You hear informally that Ananya is being reassigned away from M&A transactions. No official reason is given. You suspect it's connected to the disclosure she surfaced. You haven't been consulted.",
+          question: 'What do you do?',
+          choices: [
+            { text: 'Raise it explicitly with Tom: "I want to understand Ananya\'s reassignment. I\'m concerned it\'s connected to her doing her job correctly."', implication: "Tom is uncomfortable. He says the decision is separate. You're not sure you believe it. But the concern is now on record — and Ananya knows someone spoke up.", scores: { reputation: 90, trust: 92, longterm: 93, morale: 85 } },
+            { text: "Speak to Ananya directly — make sure she knows you'll support her if she wants to push back.", implication: "Ananya is grateful but nervous. She decides not to push back formally. But she carries the fact that you showed up. That matters to her.", scores: { reputation: 75, trust: 80, longterm: 78, morale: 82 } },
+            { text: "Let the reassignment proceed — you don't have enough information to intervene.", implication: "Ananya moves roles. In an exit survey two months later, she cites a feeling that raising difficult findings was penalised. You read it and feel the weight of the choice you didn't make.", scores: { reputation: 30, trust: 28, longterm: 22, morale: 30 } },
+          ],
+          reflection: 'Protecting the people who told the truth is part of building the culture where truth gets told. Who is responsible for that?',
+        },
+        {
+          context: 'Policy moment',
+          title: "You've been asked to update the due diligence process",
+          narrative: "The board has asked you to review the M&A due diligence protocol in light of \"lessons learned.\" This is your opportunity to shape how material findings are handled going forward — but there's pressure to make the process \"more commercial.\"",
+          question: 'How do you design the update?',
+          choices: [
+            { text: "Build in a mandatory independent legal review for all material findings — non-negotiable, regardless of deal stage.", implication: "The protocol is stronger and clearer. Future deal teams have a structure that protects them. The \"more commercial\" pressure is addressed by making the process faster, not weaker.", scores: { reputation: 93, trust: 93, longterm: 96, morale: 82 } },
+            { text: 'Add a "commercial materiality threshold" — small findings can be deferred if the deal team agrees.', implication: "A pragmatic concession. But the threshold will be interpreted broadly under deal pressure. You've moved the line.", scores: { reputation: 40, trust: 38, longterm: 28, morale: 42 } },
+            { text: "Design the update collaboratively with legal, finance and the deal teams — build the tension into the process itself.", implication: "Slower to design. But the resulting protocol is owned broadly. Tension between commercial urgency and legal rigour is structural, not personal. A more durable outcome.", scores: { reputation: 88, trust: 90, longterm: 92, morale: 85 } },
+          ],
+          reflection: "The goal of a good process isn't to make the right decision automatic — it's to make it possible. What's the difference?",
+        },
+      ],
+    },
+  ],
+};
+
+// ═══════════════════════════════════════
+// BADGE SYSTEM
+// ═══════════════════════════════════════
+function getBadge(scores) {
+  const avg = (scores.reputation + scores.trust + scores.longterm + scores.morale) / 4;
+  const trustLead = scores.trust > scores.reputation;
+  const longtermLead = scores.longterm > scores.morale;
+
+  if (avg >= 78) {
+    if (trustLead && longtermLead) return {
+      glyph: '◈', name: 'The Principled Architect',
+      tagline: "You build for the long game. You hold difficult truths with care — and create structures that make honesty easier for others too.",
+      coaching: "You demonstrate a rare combination: the courage to surface hard realities and the patience to build lasting solutions rather than quick fixes. Your instinct to create systemic clarity — not just resolve individual moments — is a leadership multiplier. The invitation now is to bring others into this work. Integrity at scale needs collaborators, not just exemplars.",
+      nextStep: "Consider: where in your organisation does integrity depend on you being present? What would it look like for others to carry it independently?",
+    };
+    if (trustLead) return {
+      glyph: '◇', name: 'The Quiet Steward',
+      tagline: "You protect what matters without needing the credit. Your integrity operates at the level of relationship — and it runs deep.",
+      coaching: "You consistently choose the path that honours trust even when no one is watching. This is integrity at its most human. The work ahead is to make your approach visible in contexts where others need to see it modelled — not for your reputation, but for the culture you're quietly building.",
+      nextStep: "Reflect: are there moments where your preference for quiet resolution has left a useful pattern invisible to others?",
+    };
+    return {
+      glyph: '◉', name: 'The Grounded Navigator',
+      tagline: "You weigh impact carefully and speak from a clear moral centre. You move others forward by being someone they can rely on.",
+      coaching: "Your decisions show a consistent thread: you lead from a stable internal compass, making space for nuance without using it as an excuse for inaction. The next edge is learning to bring others into the space you've created — not just to model integrity, but to make it conversational.",
+      nextStep: "Ask yourself: what would it look like to make your decision-making process explicit enough that it becomes a shared framework?",
+    };
+  }
+  if (avg >= 55) return {
+    glyph: '◫', name: 'The Thoughtful Challenger',
+    tagline: "You push back when it counts and know when to yield. You're navigating the complex middle of integrity — honestly.",
+    coaching: "Your choices reveal someone genuinely wrestling with the tension between relationships, systems, and honesty. That wrestling is valuable. Some of your decisions showed clarity; others showed the pull of comfort or social ease. The invitation is to notice what makes the second response feel easier — and to build a small practice around the first.",
+    nextStep: "Identify one recent moment where you chose comfort over clarity. What would the braver response have been?",
+  };
+  return {
+    glyph: '○', name: 'The Honest Learner',
+    tagline: "You're in the part of the journey where most real growth happens — where the right answer costs something.",
+    coaching: "Several of your choices prioritised immediate comfort, social smoothness, or avoiding friction. There's no judgment in that — these are the choices most humans make most of the time. The value of this experience is noticing the pattern. You now have language for the trade-off. The question is: what would it take to choose differently next time?",
+    nextStep: "Look back at your choices today. Where did the right answer feel most costly? Start there.",
+  };
+}
+
+// ═══════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectBand(el, band) {
+  document.querySelectorAll('.band-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.band = band;
+  document.getElementById('startBtn').disabled = false;
+  const names = { early: 'Early Career', mid: 'Mid-Management', senior: 'Senior Leadership' };
+  const pill = document.getElementById('bandPill');
+  pill.textContent = names[band];
+  pill.classList.add('visible');
+}
+
+function goToScenarioSelect() {
+  renderScenarioSelect();
+  goTo('screen-select');
+}
+
+function renderScenarioSelect() {
+  const scenarios = SCENARIOS[state.band];
+  const completed = state.completedScenarios;
+  document.getElementById('scenarioList').innerHTML = scenarios.map((sc, i) => {
+    const isLocked = sc.locked && completed.length < 2;
+    return `<div class="scenario-card ${isLocked ? 'locked' : ''}" onclick="${isLocked ? '' : `startScenario('${sc.id}')`}">
+      <div class="scenario-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="scenario-info">
+        <div class="scenario-title">${sc.title}</div>
+        <div class="scenario-blurb">${sc.blurb}</div>
+      </div>
+      <span class="scenario-badge ${isLocked ? 'locked-badge' : ''}">${completed.includes(sc.id) ? 'Completed' : isLocked ? 'Locked' : 'Available'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// STORY ENGINE
+// ═══════════════════════════════════════
+let currentScenario = null;
+
+function startScenario(id) {
+  currentScenario = SCENARIOS[state.band].find(s => s.id === id);
+  state.scenarioId = id;
+  state._l0ChoiceIndex = null;
+  state._finalScores = null;
+  renderLevel1();
+  goTo('screen-story');
+}
+
+function renderLevel1() {
+  const L = currentScenario.level1;
+  document.getElementById('storyContent').innerHTML = `
+    <div class="story-progress">
+      <div class="progress-dots">
+        <div class="pdot active" id="pd0"></div>
+        <div class="pdot" id="pd1"></div>
+        <div class="pdot" id="pd2"></div>
+      </div>
+      <span class="progress-label">Level 1 of 2</span>
+    </div>
+    <div class="story-scene">
+      <div class="scene-context">${L.context}</div>
+      <div class="scene-title">${L.title}</div>
+      <div class="scene-narrative">${L.narrative}</div>
+      <div class="scene-question">${L.question}</div>
+      <div class="choices">
+        ${L.choices.map((c,i) => `<button class="choice-btn" onclick="selectLevel1Choice(${i})" id="c0-${i}">
+          <div class="choice-letter">${String.fromCharCode(65+i)}</div>
+          <div class="choice-text">${c.text}</div>
+        </button>`).join('')}
+      </div>
+      <div id="impl0"></div><div id="refl0"></div><div id="next0"></div>
+    </div>`;
+}
+
+function selectLevel1Choice(idx) {
+  state._l0ChoiceIndex = idx;
+  const chosen = currentScenario.level1.choices[idx];
+  document.querySelectorAll('[id^="c0-"]').forEach((b,i) => {
+    b.classList.toggle('selected', i===idx);
+    b.classList.toggle('dimmed', i!==idx);
+  });
+  document.getElementById('impl0').innerHTML = `
+    <div class="implication-box">
+      <div class="impl-label">What happens</div>
+      <div class="impl-text">${chosen.implication}</div>
+      <div class="impl-scores">${renderScoreChips(chosen.scores)}</div>
+    </div>`;
+  document.getElementById('refl0').innerHTML = `
+    <div class="reflection-box">
+      <div class="reflection-label">Pause &amp; Reflect</div>
+      <div class="reflection-q">${currentScenario.level1.reflection}</div>
+      <textarea class="reflection-input" rows="3" placeholder="Take a moment to note your thoughts… (optional)"></textarea>
+    </div>`;
+  document.getElementById('next0').innerHTML = `<button class="btn btn-primary" onclick="advanceToLevel2()">Continue &rarr;</button>`;
+  setTimeout(() => document.getElementById('impl0').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+
+function advanceToLevel2() {
+  const branch = currentScenario.level2[state._l0ChoiceIndex];
+  document.getElementById('pd0').className = 'pdot done';
+  document.getElementById('pd1').className = 'pdot active';
+  document.getElementById('next0').innerHTML = '';
+  document.getElementById('storyContent').insertAdjacentHTML('beforeend', `
+    <div class="story-scene" id="scene2block" style="animation:fadeUp 0.5s ease both;margin-top:2rem;padding-top:2rem;border-top:0.5px solid var(--paper-3)">
+      <div class="scene-context">${branch.context}</div>
+      <div class="scene-title">${branch.title}</div>
+      <div class="scene-narrative">${branch.narrative}</div>
+      <div class="scene-question">${branch.question}</div>
+      <div class="choices">
+        ${branch.choices.map((c,i) => `<button class="choice-btn" onclick="selectLevel2Choice(${i})" id="c1-${i}">
+          <div class="choice-letter">${String.fromCharCode(65+i)}</div>
+          <div class="choice-text">${c.text}</div>
+        </button>`).join('')}
+      </div>
+      <div id="impl1"></div><div id="refl1"></div><div id="next1"></div>
+    </div>`);
+  setTimeout(() => document.getElementById('scene2block').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+function selectLevel2Choice(idx) {
+  const branch = currentScenario.level2[state._l0ChoiceIndex];
+  const chosen = branch.choices[idx];
+  document.querySelectorAll('[id^="c1-"]').forEach((b,i) => {
+    b.classList.toggle('selected', i===idx);
+    b.classList.toggle('dimmed', i!==idx);
+  });
+  document.getElementById('impl1').innerHTML = `
+    <div class="implication-box">
+      <div class="impl-label">What happens</div>
+      <div class="impl-text">${chosen.implication}</div>
+      <div class="impl-scores">${renderScoreChips(chosen.scores)}</div>
+    </div>`;
+  document.getElementById('refl1').innerHTML = `
+    <div class="reflection-box">
+      <div class="reflection-label">Pause &amp; Reflect</div>
+      <div class="reflection-q">${branch.reflection}</div>
+      <textarea class="reflection-input" rows="3" placeholder="What are you taking away from this scenario?"></textarea>
+    </div>`;
+  const l0s = currentScenario.level1.choices[state._l0ChoiceIndex].scores;
+  state._finalScores = {
+    reputation: Math.round((l0s.reputation + chosen.scores.reputation) / 2),
+    trust:      Math.round((l0s.trust      + chosen.scores.trust)      / 2),
+    longterm:   Math.round((l0s.longterm   + chosen.scores.longterm)   / 2),
+    morale:     Math.round((l0s.morale     + chosen.scores.morale)     / 2),
+  };
+  document.getElementById('next1').innerHTML = `<button class="btn btn-gold" onclick="showResults()">See your results &rarr;</button>`;
+  setTimeout(() => document.getElementById('impl1').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+
+function renderScoreChips(scores) {
+  return [
+    { key:'reputation', label:'Reputation Impact' },
+    { key:'trust',      label:'Stakeholder Trust' },
+    { key:'longterm',   label:'Long-Term Consequence' },
+    { key:'morale',     label:'Team Morale' },
+  ].map(d => {
+    const v = scores[d.key];
+    const cls = v>=70?'dot-pos':v>=45?'dot-mid':'dot-neg';
+    const lbl = v>=70?'Strengthened':v>=45?'Neutral':'Weakened';
+    return `<span class="score-chip"><span class="score-dot ${cls}"></span>${d.label}: ${lbl}</span>`;
+  }).join('');
+}
+
+function showResults() {
+  const scores = state._finalScores;
+  if (!state.completedScenarios.includes(state.scenarioId))
+    state.completedScenarios.push(state.scenarioId);
+  const badge = getBadge(scores);
+  const dims = [
+    { key:'reputation', label:'Reputation Impact' },
+    { key:'trust',      label:'Stakeholder Trust' },
+    { key:'longterm',   label:'Long-Term Consequence' },
+    { key:'morale',     label:'Team Morale' },
+  ];
+  document.getElementById('resultsContent').innerHTML = `
+    <div class="results-hero">
+      <div class="badge-glyph">${badge.glyph}</div>
+      <div class="badge-label">Your Compass Badge</div>
+      <div class="badge-name">${badge.name}</div>
+      <div class="badge-tagline">${badge.tagline}</div>
+    </div>
+    <div class="score-board">
+      ${dims.map(d=>`<div class="score-card">
+        <div class="sc-label">${d.label}</div>
+        <div class="sc-bar-bg"><div class="sc-bar" style="width:${scores[d.key]}%"></div></div>
+        <div class="sc-val">${scores[d.key]>=70?'Strengthened':scores[d.key]>=45?'Moderate':'Weakened'}</div>
+      </div>`).join('')}
+    </div>
+    <div class="coaching-block">
+      <h3>Coaching insight</h3>
+      <p>${badge.coaching}</p>
+      <span class="value-reveal">Value explored: Integrity</span>
+    </div>
+    <div class="coaching-block" style="background:var(--paper-2)">
+      <h3>Your next edge</h3>
+      <p>${badge.nextStep}</p>
+    </div>
+    <hr class="divider">
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="goToScenarioSelect()">Try another scenario</button>
+      <button class="btn btn-ghost" onclick="startScenario('${state.scenarioId}')">Explore different choices</button>
+      <button class="btn btn-ghost" onclick="goTo('screen-landing')">Change band</button>
+    </div>`;
+  goTo('screen-results');
+  setTimeout(() => {
+    document.querySelectorAll('.sc-bar').forEach(bar => {
+      const w = bar.style.width; bar.style.width='0%';
+      setTimeout(()=>{ bar.style.width=w; },100);
+    });
+  }, 200);
+}
+</script>
+</body>
+</html>
